@@ -2,16 +2,74 @@ import pandas as pd
 from pathlib import Path
 
 # ==========================================
-# FILE PATHS
+# SELECT DATA FOLDER
 # ==========================================
 
+<<<<<<< HEAD
 base_path = Path("/Users/hansi/Desktop/Enclustra Interview/gittestrepo/DATAtest")
+=======
+folder_selected = input(
+    "Drag the data folder here and press Enter: "
+).strip()
+>>>>>>> MultiBOMLCManalysis
 
-bom_file = base_path / "BOM.xlsx"
-avl_file = base_path / "AVL_multi_use_at_risk.xlsx"
-lifecycle_file = base_path / "Lifecycle_Data_multi_use_at_risk.xlsx"
+# Remove quotes if macOS adds them
+folder_selected = folder_selected.strip("'").strip('"')
 
-output_file = base_path / "Risk_Report.xlsx"
+base_path = Path(folder_selected)
+
+if not base_path.exists():
+    raise FileNotFoundError(
+        f"Folder does not exist: {base_path}"
+    )
+
+
+print(f"\nSelected folder: {base_path}")
+
+# ==========================================
+# FIND INPUT FILES AUTOMATICALLY
+# ==========================================
+
+bom_files = list(base_path.glob("*BOM*.xlsx"))
+
+avl_files = list(
+    base_path.glob("*AVL_multi_use_at_risk*.xlsx")
+)
+
+lifecycle_files = list(
+    base_path.glob("*Lifecycle_Data_multi_use_at_risk*.xlsx")
+)
+
+# ==========================================
+# VALIDATE FILES
+# ==========================================
+
+if not bom_files:
+    raise FileNotFoundError(
+        "No BOM Excel file found."
+    )
+
+if not avl_files:
+    raise FileNotFoundError(
+        "No AVL multi-use Excel file found."
+    )
+
+if not lifecycle_files:
+    raise FileNotFoundError(
+        "No Lifecycle multi-use Excel file found."
+    )
+
+# ==========================================
+# USE FIRST MATCHING FILE
+# ==========================================
+
+bom_file = bom_files[0]
+avl_file = avl_files[0]
+lifecycle_file = lifecycle_files[0]
+
+print(f"\nBOM file used: {bom_file.name}")
+print(f"AVL file used: {avl_file.name}")
+print(f"Lifecycle file used: {lifecycle_file.name}")
 
 # ==========================================
 # LOAD EXCEL FILES
@@ -22,7 +80,7 @@ avl = pd.read_excel(avl_file)
 lifecycle = pd.read_excel(lifecycle_file)
 
 # ==========================================
-# STEP 1: FIND RISKY MPNs FROM LIFECYCLE DATA
+# FIND RISKY MPNs
 # ==========================================
 
 risk_status = ["NRND", "EOL"]
@@ -38,10 +96,8 @@ risky_mpns = risky_mpns.rename(columns={
 })
 
 # ==========================================
-# STEP 2: NORMALIZE AVL
-# Main MPN and Alternative MPN become one common column.
-# This allows the same risky MPN to be found whether it is
-# listed as the main source or as an alternative.
+# NORMALIZE AVL
+# Main and Alternative sources become one table
 # ==========================================
 
 main_sources = avl[[
@@ -55,8 +111,6 @@ main_sources = main_sources.rename(columns={
     "Manufacturer PN": "MPN"
 })
 
-main_sources["AVL Role"] = "Main"
-
 alternative_sources = avl[[
     "PN",
     "Alternative Vendor",
@@ -69,15 +123,14 @@ alternative_sources = alternative_sources.rename(columns={
     "Alternative PN": "MPN"
 })
 
-alternative_sources["AVL Role"] = "Alternative"
-
+# Combine main and alternative sources
 avl_normalized = pd.concat(
     [main_sources, alternative_sources],
     ignore_index=True
 )
 
 # ==========================================
-# STEP 3: MAP RISKY MPNs TO INTERNAL PNs
+# MAP RISKY MPNs TO INTERNAL PNs
 # ==========================================
 
 risk_usage = risky_mpns.merge(
@@ -88,15 +141,19 @@ risk_usage = risky_mpns.merge(
 )
 
 # ==========================================
-# STEP 4: GROUP MULTIPLE INTERNAL PNs INTO WHERE USED
+# CREATE FINAL REPORT
 # ==========================================
 
 final_report = (
     risk_usage
     .dropna(subset=["Internal PN"])
-    .groupby(["MPN at Risk", "Lifecycle Risk"], as_index=False)
+    .groupby(
+        ["MPN at Risk", "Lifecycle Risk"],
+        as_index=False
+    )
     .agg({
-        "Internal PN": lambda x: ", ".join(sorted(set(x)))
+        "Internal PN": lambda x:
+            ", ".join(sorted(set(x)))
     })
     .rename(columns={
         "Internal PN": "Where Used"
@@ -107,14 +164,21 @@ final_report = (
 # EXPORT REPORT
 # ==========================================
 
-final_report.to_excel(output_file, index=False)
+output_file = base_path / "Risk_Report.xlsx"
+
+final_report.to_excel(
+    output_file,
+    index=False
+)
 
 # ==========================================
 # PRINT RESULTS
 # ==========================================
 
 print("\n=== COMPONENT RISK REPORT ===\n")
+
 print(final_report)
 
-print(f"\nRisk report exported successfully: {output_file}")
-
+print(
+    f"\nRisk report exported successfully trlala:\n{output_file}"
+)
