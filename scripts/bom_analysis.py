@@ -5,7 +5,7 @@ from pathlib import Path
 # FILE PATHS
 # ==========================================
 
-base_path = Path("/Users/hansi/Git rep test local clone/Testa/DATAtest")
+base_path = Path("/Users/hansi/Desktop/Enclustra Interview/gittestrepo/DATAtest")
 
 bom_file = base_path / "BOM.xlsx"
 avl_file = base_path / "AVL_multi_use_at_risk.xlsx"
