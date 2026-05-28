@@ -19,6 +19,7 @@ if not base_path.exists():
         f"Folder does not exist: {base_path}"
     )
 
+
 print(f"\nSelected folder: {base_path}")
 
 # ==========================================
@@ -175,5 +176,5 @@ print("\n=== COMPONENT RISK REPORT ===\n")
 print(final_report)
 
 print(
-    f"\nRisk report exported successfully:\n{output_file}"
+    f"\nRisk report exported successfully trlala:\n{output_file}"
 )
